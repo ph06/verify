@@ -129,9 +129,13 @@ bool verify(const ExtractedArgs& args, const std::string& data) {
 	Botan::PK_Verifier verifier(*pub_key, "EMSA1(SHA-256)");
 	verifier.update(data);
 
-	const auto signature = Botan::BigInt::encode(
+	auto signature = Botan::BigInt::encode(
 		Botan::BigInt(std::string(args.at(Argument::SIGNATURE)))
 	);
+
+	if (args.at(Argument::SIGNATURE).substr(1,3) == "x00" || args.at(Argument::SIGNATURE).substr(0,2) == "00") {
+		signature.insert(signature.begin(), 0);
+	}
 
 	return verifier.check_signature(signature);
 }
